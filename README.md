@@ -17,15 +17,6 @@
 - 👁️ 文件变更自动监控并刷新缓存（FileSystemWatcher）
 - 🎨 Fluent Design 现代化界面（Acrylic 亚克力 / NavigationView / 圆角过渡）
 
-## 技术栈
-
-| 层级 | 技术 |
-|------|------|
-| 框架 | .NET 8 WPF |
-| 语言 | C# 12 |
-| MVVM | CommunityToolkit.Mvvm 8.4 |
-| Fluent 控件 | iNKORE.UI.WPF.Modern 0.10.2 |
-| DI 容器 | Microsoft.Extensions.DependencyInjection 8.0 |
 
 ## 系统要求
 
