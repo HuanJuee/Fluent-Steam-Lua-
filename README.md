@@ -6,7 +6,7 @@
 
 | 主页 | 设置页 | 入库页 |
 |------|--------|--------|
-| ![主页](screenshots/home.png) | ![设置页](screenshots/settings.png) | ![入库页](screenshots/script-download.png) |
+| ![主页](screenshots/home.git) | ![设置页](screenshots/setting.gif) | ![入库页](screenshots/ruku.gif) |
 
 ## 功能特性
 
