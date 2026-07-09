@@ -17,6 +17,7 @@ public partial class MainViewModel : ObservableObject
 	private readonly ISteamApiService _steamApiService;
 	private readonly INavigationService _navigationService;
 	private readonly ISettingsService _settingsService;
+	private readonly ISteamManifestService _steamManifestService;
 	private List<GameInfo> _allGames = new();
 	private CancellationTokenSource? _refreshCts;
 	private System.Windows.Threading.DispatcherTimer? _progressTimer;
@@ -62,13 +63,15 @@ public partial class MainViewModel : ObservableObject
 		ILuaFileManager luaFileManager,
 		ISteamApiService steamApiService,
 		INavigationService navigationService,
-		ISettingsService settingsService)
+		ISettingsService settingsService,
+		ISteamManifestService steamManifestService)
 	{
 		_steamPathService = steamPathService;
 		_luaFileManager = luaFileManager;
 		_steamApiService = steamApiService;
 		_navigationService = navigationService;
 		_settingsService = settingsService;
+		_steamManifestService = steamManifestService;
 
 		_navigationService.NavigationChanged += (_, view) => CurrentView = view;
 		_luaFileManager.FilesChanged += OnFilesChanged;
@@ -121,13 +124,24 @@ public partial class MainViewModel : ObservableObject
 			_steamApiService.PopulateFromCache(_allGames);
 			ApplyFilter();
 			UpdateStatus();
-			await _steamApiService.RefreshGameInfoAsync(_allGames, token);
-			if (!token.IsCancellationRequested)
+		await _steamApiService.RefreshGameInfoAsync(_allGames, token);
+		if (!token.IsCancellationRequested)
+		{
+			ApplyFilter();
+			UpdateStatus();
+		}
+
+		foreach (var game in _allGames)
+		{
+			var refreshed = await _luaFileManager.ParseLuaFileAsync(game.AppId);
+			if (refreshed != null)
 			{
-				ApplyFilter();
-				UpdateStatus();
+				game.IsManifestPinned = refreshed.IsManifestPinned;
+				game.Token = refreshed.Token;
 			}
 		}
+		ApplyFilter();
+	}
 		catch (Exception ex) { StatusText = $"刷新失败: {ex.Message}"; }
 		finally
 		{
@@ -316,6 +330,108 @@ public partial class MainViewModel : ObservableObject
 		var luaFolder = _steamPathService.GetLuaFolder();
 		if (!string.IsNullOrEmpty(luaFolder) && Directory.Exists(luaFolder))
 			Process.Start(new ProcessStartInfo { FileName = luaFolder, UseShellExecute = true });
+	}
+
+	[RelayCommand]
+	private async Task PinToLatestAsync(GameInfo? game)
+	{
+		if (game == null) return;
+
+		if (game.IsManifestPinned && game.ManifestSourceIndex == 1)
+		{
+			await PinUnpinAsync(game);
+			return;
+		}
+
+		game.ManifestSourceIndex = 1;
+		await PinUnpinAsync(game);
+	}
+
+	[RelayCommand]
+	private async Task PinToCurrentAsync(GameInfo? game)
+	{
+		if (game == null) return;
+
+		if (game.IsManifestPinned && game.ManifestSourceIndex == 0)
+		{
+			await PinUnpinAsync(game);
+			return;
+		}
+
+		var acfPath = _steamPathService.FindAppManifest(game.AppId);
+		if (acfPath == null)
+		{
+			MessageBox.Show($"{game.GameName} 未在本地安装，无法固定到当前版本",
+				"无法固定版本", MessageBoxButton.OK, MessageBoxImage.Warning);
+			return;
+		}
+
+		game.ManifestSourceIndex = 0;
+		await PinUnpinAsync(game);
+	}
+
+	[RelayCommand]
+	private async Task UnpinGameAsync(GameInfo? game)
+	{
+		if (game == null || !game.IsManifestPinned) return;
+		await PinUnpinAsync(game);
+	}
+
+	private async Task PinUnpinAsync(GameInfo game)
+	{
+		if (game.IsManifestPinned)
+		{
+			await _luaFileManager.SetManifestPinAsync(game.AppId, false);
+			game.ManifestSourceIndex = 0;
+			StatusText = $"已解除 {game.GameName} 的版本固定";
+		}
+		else
+		{
+			var manifestIds = new Dictionary<int, string>();
+			var sourceName = game.ManifestSourceIndex == 0 ? "当前安装版本" : "Steam 最新版本";
+
+			foreach (var depot in game.Depots)
+			{
+				string? manifestId = null;
+
+				if (game.ManifestSourceIndex == 0)
+				{
+					var acfPath = _steamPathService.FindAppManifest(game.AppId);
+					if (acfPath != null)
+					{
+						var mounted = _steamManifestService.ParseMountedDepots(acfPath);
+						mounted.TryGetValue(depot.DepotId, out manifestId);
+					}
+				}
+				else
+				{
+					manifestId = await _steamManifestService.FetchLatestManifestIdAsync(game.AppId, depot.DepotId);
+				}
+
+				if (!string.IsNullOrEmpty(manifestId))
+					manifestIds[depot.DepotId] = manifestId;
+			}
+
+			if (manifestIds.Count == 0)
+			{
+				MessageBox.Show($"无法获取 {game.GameName} 的 manifest 信息",
+					"无法固定版本", MessageBoxButton.OK, MessageBoxImage.Warning);
+				return;
+			}
+
+			await _luaFileManager.SetManifestPinAsync(game.AppId, true, manifestIds);
+			StatusText = $"已将 {game.GameName} 固定到{sourceName}";
+		}
+
+		var refreshed = await _luaFileManager.ParseLuaFileAsync(game.AppId);
+		if (refreshed != null)
+		{
+			game.Depots.Clear();
+			foreach (var d in refreshed.Depots)
+				game.Depots.Add(d);
+			game.IsManifestPinned = refreshed.IsManifestPinned;
+			game.Token = refreshed.Token;
+		}
 	}
 
 	public async Task HandleDropAsync(string[] files)

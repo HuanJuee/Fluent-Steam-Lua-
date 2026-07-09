@@ -79,9 +79,15 @@
                                 </Grid.ColumnDefinitions>
                                 <Image Grid.Column="0" Source="{Binding CoverUrl}" Width="120" Height="52"
                                        Stretch="UniformToFill" Margin="0,0,16,0"/>
-                                <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"/>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock FontSize="12" Margin="0,2,0,0"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                        <Run Text="AppID: "/><Run Text="{Binding AppId}"/>
+                                    </TextBlock>
+                                </StackPanel>
                                 <Button Grid.Column="2" Content="一键入库" Command="{Binding DataContext.DownloadGameCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding}"
                                         Padding="16,6" Height="36" FontSize="14"

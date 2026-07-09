@@ -14,4 +14,6 @@ public interface ISteamPathService
     void SetCustomPath(string path);
     string? GetCustomPath();
     SteamToolType DetectSteamToolType();
+    List<string> GetAllLibraryPaths();
+    string? FindAppManifest(int appId);
 }

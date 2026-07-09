@@ -61,6 +61,30 @@ public partial class HomeView : UserControl
             menu.Items.Add(editItem);
             menu.Items.Add(deleteItem);
 
+            menu.Items.Add(new Separator());
+
+            var pinSubMenu = new MenuItem { Header = "版本固定" };
+
+            if (game.IsManifestPinned)
+            {
+                var unpinItem = new MenuItem { Header = "取消版本固定" };
+                unpinItem.Click += async (_, _) => await vm.UnpinGameCommand.ExecuteAsync(game);
+                pinSubMenu.Items.Add(unpinItem);
+            }
+            else
+            {
+                var latestItem = new MenuItem { Header = "固定到游戏最新版本" };
+                latestItem.Click += async (_, _) => await vm.PinToLatestCommand.ExecuteAsync(game);
+
+                var currentItem = new MenuItem { Header = "固定到当前已安装版本" };
+                currentItem.Click += async (_, _) => await vm.PinToCurrentCommand.ExecuteAsync(game);
+
+                pinSubMenu.Items.Add(latestItem);
+                pinSubMenu.Items.Add(currentItem);
+            }
+
+            menu.Items.Add(pinSubMenu);
+
             menu.PlacementTarget = btn;
             menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             menu.IsOpen = true;

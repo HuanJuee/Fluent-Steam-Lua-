@@ -10,5 +10,6 @@
     <converters:EqualityToVisibilityConverter x:Key="EqualityToVisibilityConverter"/>
     <converters:FilePathToImageConverter x:Key="FilePathToImageConverter"/>
     <converters:BoolInvertConverter x:Key="BoolInvertConverter"/>
+    <converters:BoolToRunStopConverter x:Key="BoolToRunStopConverter"/>
 
 </ResourceDictionary>

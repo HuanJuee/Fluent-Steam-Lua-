@@ -10,4 +10,6 @@ public interface ILuaFileManager
     void StartWatching();
     void StopWatching();
     event EventHandler? FilesChanged;
+    Task<GameInfo?> ParseLuaFileAsync(int appId);
+    Task SetManifestPinAsync(int appId, bool pin, Dictionary<int, string>? manifestIds = null);
 }

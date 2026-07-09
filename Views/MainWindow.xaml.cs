@@ -12,24 +12,27 @@ namespace SteamLuaManager.Views;
 
 public partial class MainWindow : Window
 {
-    private readonly string[] _navOrder = ["Home", "ScriptDownload", "Settings", "About"];
+    private readonly string[] _navOrder = ["Home", "ScriptDownload", "Extraction", "Settings", "About"];
     private string _prevTag = "Home";
 
     private readonly MainViewModel _viewModel;
     private readonly ISettingsService _settingsService;
     private readonly SettingsViewModel _settingsViewModel;
     private readonly ScriptDownloadViewModel _scriptDownloadViewModel;
+    private readonly ExtractionViewModel _extractionViewModel;
     private readonly HomeView _homeView;
     private readonly SettingsView _settingsView;
     private readonly ScriptDownloadView _scriptDownloadView;
+    private readonly ExtractionView _extractionView;
     private readonly AboutView _aboutView;
 
-    public MainWindow(MainViewModel viewModel, SettingsViewModel settingsViewModel, ScriptDownloadViewModel scriptDownloadViewModel, ISettingsService settingsService)
+    public MainWindow(MainViewModel viewModel, SettingsViewModel settingsViewModel, ScriptDownloadViewModel scriptDownloadViewModel, ExtractionViewModel extractionViewModel, ISettingsService settingsService)
     {
         InitializeComponent();
         _viewModel = viewModel;
         _settingsViewModel = settingsViewModel;
         _scriptDownloadViewModel = scriptDownloadViewModel;
+        _extractionViewModel = extractionViewModel;
         _settingsService = settingsService;
         DataContext = _viewModel;
 
@@ -41,6 +44,7 @@ public partial class MainWindow : Window
         _homeView = new HomeView { DataContext = _viewModel };
         _settingsView = new SettingsView { DataContext = settingsViewModel };
         _scriptDownloadView = new ScriptDownloadView { DataContext = scriptDownloadViewModel };
+        _extractionView = new ExtractionView { DataContext = extractionViewModel };
         _aboutView = new AboutView();
         ContentTransition.Content = _homeView;
 
@@ -118,6 +122,11 @@ public partial class MainWindow : Window
             _scriptDownloadViewModel.SearchResults.Clear();
             _scriptDownloadViewModel.StatusMessage = "";
         }
+        if (tag != "Extraction")
+        {
+            _extractionViewModel.LogLines.Clear();
+            _extractionViewModel.StatusMessage = "";
+        }
         if (tag != "Settings")
         {
             _settingsViewModel.SpeedTestResults.Clear();
@@ -151,6 +160,7 @@ public partial class MainWindow : Window
             "Home" => _homeView,
             "Settings" => _settingsView,
             "ScriptDownload" => _scriptDownloadView,
+            "Extraction" => _extractionView,
             "About" => _aboutView,
             _ => null
         };

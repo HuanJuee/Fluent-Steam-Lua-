@@ -27,12 +27,15 @@ public partial class App : Application
         services.AddSingleton<ISteamPathService, SteamPathService>();
         services.AddSingleton<ILuaFileManager, LuaFileManager>();
         services.AddSingleton<ISteamApiService, SteamApiService>();
+        services.AddSingleton<ISteamManifestService, SteamManifestService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<ISteamDumperService, SteamDumperService>();
 
         services.AddTransient<MainViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<ScriptDownloadViewModel>();
+        services.AddTransient<ExtractionViewModel>();
         services.AddTransient<MainWindow>();
     }
 }

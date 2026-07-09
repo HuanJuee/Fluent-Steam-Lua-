@@ -20,8 +20,6 @@
             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                 <TextBlock Text="已入库的游戏" FontSize="28" FontWeight="Bold"
                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                <TextBlock Text="{Binding StatusText}" FontSize="13"
-                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0"/>
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -34,7 +32,7 @@
                 <Button Command="{Binding AddFilesCommand}" Padding="12,6" Margin="4,0">
                     <StackPanel Orientation="Horizontal">
                         <ui:FontIcon Glyph="&#xE710;" FontSize="14" Margin="0,0,6,0"/>
-                        <TextBlock Text="添加文件" VerticalAlignment="Center"/>
+                        <TextBlock Text="添加游戏" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
                 <Button Command="{Binding OpenLuaFolderCommand}" Padding="12,6" Margin="4,0">
@@ -119,39 +117,61 @@
                                     BorderBrush="#25FFFFFF"
                                     BorderThickness="1"
                                     Tag="{Binding}">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="120"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="120"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                                    <Rectangle Grid.Row="0" Fill="#25000000"/>
-                                    <Image Grid.Row="0"
-                                           Source="{Binding CoverImagePath, Converter={StaticResource FilePathToImageConverter}}"
-                                           Stretch="UniformToFill"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                        <Rectangle Grid.Row="0" Fill="#25000000"/>
+                                        <Image Grid.Row="0"
+                                               Source="{Binding CoverImagePath, Converter={StaticResource FilePathToImageConverter}}"
+                                               Stretch="UniformToFill"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
 
-                                    <TextBlock Grid.Row="1" Text="{Binding GameName}"
-                                               FontWeight="SemiBold" FontSize="14"
-                                               Margin="12,10,12,2" TextTrimming="CharacterEllipsis"
-                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                        <TextBlock Grid.Row="1" Text="{Binding GameName}"
+                                                   FontWeight="SemiBold" FontSize="14"
+                                                   Margin="12,10,12,2" TextTrimming="CharacterEllipsis"
+                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                                    <TextBlock Grid.Row="2" FontSize="12" Margin="12,0,12,8"
-                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}">
-                                        <Run Text="AppID: "/>
-                                        <Run Text="{Binding AppId, Mode=OneWay}"/>
-                                    </TextBlock>
+                                        <TextBlock Grid.Row="2" FontSize="12" Margin="12,0,12,8"
+                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                            <Run Text="AppID: "/>
+                                            <Run Text="{Binding AppId, Mode=OneWay}"/>
+                                        </TextBlock>
 
-                                    <Button Grid.Row="3" Tag="{Binding}" Click="MoreButton_Click"
-                                            HorizontalAlignment="Right" Margin="0,0,8,8"
-                                            Padding="6,4" FontSize="12" Background="Transparent" BorderThickness="0">
-                                        <ui:FontIcon Glyph="&#xE712;" FontSize="16"/>
-                                    </Button>
-                                </Grid>
+                                        <Grid Grid.Row="3" Margin="12,0,8,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0" FontSize="10"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource SystemAccentColorBrush}"
+                                                       Text="● 版本已固定">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsManifestPinned}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+
+                                            <Button Grid.Column="1" Tag="{Binding}" Click="MoreButton_Click"
+                                                    Padding="6,4" FontSize="12" Background="Transparent" BorderThickness="0">
+                                                <ui:FontIcon Glyph="&#xE712;" FontSize="16"/>
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
                             </controls:ClippingBorder>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -188,11 +208,27 @@
                                             <TextBlock Text="{Binding GameName}" FontWeight="SemiBold" FontSize="14"
                                                        TextTrimming="CharacterEllipsis"
                                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                            <TextBlock FontSize="12" Margin="0,2,0,0"
-                                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}">
-                                                <Run Text="AppID: "/>
-                                                <Run Text="{Binding AppId, Mode=OneWay}"/>
-                                            </TextBlock>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                <TextBlock FontSize="12"
+                                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                                    <Run Text="AppID: "/>
+                                                    <Run Text="{Binding AppId, Mode=OneWay}"/>
+                                                </TextBlock>
+                                                <TextBlock FontSize="10" Margin="10,0,0,0"
+                                                           Foreground="{DynamicResource SystemAccentColorBrush}"
+                                                           Text="● 版本已固定">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsManifestPinned}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
                                         </StackPanel>
 
                                         <Button Grid.Column="2" Tag="{Binding}" Click="MoreButton_Click"
@@ -224,14 +260,18 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="90"/>
                                 <ColumnDefinition Width="100"/>
                                 <ColumnDefinition Width="40"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="游戏名称" FontWeight="SemiBold" FontSize="13" Padding="14,10"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                            <TextBlock Grid.Column="1" Text="AppID" FontWeight="SemiBold" FontSize="13" Padding="14,10"
+                            <TextBlock Grid.Column="1" Text="版本状态" FontWeight="SemiBold" FontSize="13" Padding="10,9"
+                                       VerticalAlignment="Center"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                            <TextBlock Grid.Column="2" FontWeight="SemiBold" FontSize="13" Padding="14,10"/>
+                            <TextBlock Grid.Column="2" Text="AppID" FontWeight="SemiBold" FontSize="13" Padding="14,10"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            <TextBlock Grid.Column="3" FontWeight="SemiBold" FontSize="13" Padding="14,10"/>
                         </Grid>
                     </Border>
 
@@ -243,15 +283,30 @@
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="90"/>
                                             <ColumnDefinition Width="100"/>
                                             <ColumnDefinition Width="40"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{Binding GameName}" FontSize="13" Padding="14,9"
                                                    TextTrimming="CharacterEllipsis"
                                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding AppId}" FontSize="13" Padding="14,9"
+                                        <TextBlock Grid.Column="1" FontSize="13" Padding="10,9"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="未固定"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsManifestPinned}" Value="True">
+                                                            <Setter Property="Text" Value="已固定"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Grid.Column="2" Text="{Binding AppId}" FontSize="13" Padding="14,9"
                                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                                        <Button Grid.Column="2" Tag="{Binding}" Click="MoreButton_Click"
+                                        <Button Grid.Column="3" Tag="{Binding}" Click="MoreButton_Click"
                                                 HorizontalAlignment="Center" VerticalAlignment="Center"
                                                 Padding="6,4" Background="Transparent" BorderThickness="0"
                                                 Foreground="{DynamicResource TextFillColorSecondaryBrush}">

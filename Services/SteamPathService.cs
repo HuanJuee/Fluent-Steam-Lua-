@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
 namespace SteamLuaManager.Services;
@@ -78,5 +79,59 @@ public class SteamPathService : ISteamPathService
             return SteamToolType.SteamTools;
 
         return SteamToolType.None;
+    }
+
+    public List<string> GetAllLibraryPaths()
+    {
+        var paths = new List<string>();
+        var steamPath = !string.IsNullOrEmpty(_customPath) ? _customPath : DetectSteamPath();
+        if (string.IsNullOrEmpty(steamPath)) return paths;
+
+        paths.Add(steamPath);
+
+        var vdfPath = Path.Combine(steamPath, @"steamapps\libraryfolders.vdf");
+        if (!File.Exists(vdfPath)) return paths;
+
+        try
+        {
+            var content = File.ReadAllText(vdfPath);
+
+            // 新版格式: "1"\n{\n\t"path"\t"C:\\..."
+            var sectionMatches = Regex.Matches(content,
+                @"""\d+""\s*\{[^}]*""path""\s+""([^""]+)""",
+                RegexOptions.Singleline);
+            foreach (Match match in sectionMatches)
+            {
+                var libPath = match.Groups[1].Value.Replace("\\\\", "\\");
+                if (!paths.Contains(libPath))
+                    paths.Add(libPath);
+            }
+
+            // 旧版格式: "1"  "path" (当新版未匹配到时)
+            if (sectionMatches.Count == 0)
+            {
+                var flatMatches = Regex.Matches(content, @"""\d+""\s+""([^""]+)""");
+                foreach (Match match in flatMatches)
+                {
+                    var libPath = match.Groups[1].Value.Replace("\\\\", "\\");
+                    if (!paths.Contains(libPath))
+                        paths.Add(libPath);
+                }
+            }
+        }
+        catch { }
+
+        return paths;
+    }
+
+    public string? FindAppManifest(int appId)
+    {
+        foreach (var libPath in GetAllLibraryPaths())
+        {
+            var acfPath = Path.Combine(libPath, @"steamapps", $"appmanifest_{appId}.acf");
+            if (File.Exists(acfPath))
+                return acfPath;
+        }
+        return null;
     }
 }

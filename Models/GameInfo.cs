@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SteamLuaManager.Models;
 
@@ -18,4 +19,16 @@ public partial class GameInfo : ObservableObject
 
     [ObservableProperty]
     private bool _isLoading;
+
+    [ObservableProperty]
+    private string _token = string.Empty;
+
+    [ObservableProperty]
+    private bool _isManifestPinned;
+
+    [ObservableProperty]
+    private int _manifestSourceIndex;
+
+    public ObservableCollection<DepotInfo> Depots { get; set; } = new();
 }
+
